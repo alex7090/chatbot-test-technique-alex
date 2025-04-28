@@ -1,5 +1,6 @@
 'use client';
 
+import HelperInput from './Helper';
 import { useState, useRef, useEffect, memo } from 'react';
 
 interface ChatInputProps {
@@ -13,14 +14,20 @@ interface ChatInputProps {
  */
 const ChatInput = memo(function ChatInput({ onSendMessage, isDisabled = false }: ChatInputProps) {
   const [message, setMessage] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Focus sur l'input au chargement du composant et quand il n'est plus désactivé
   useEffect(() => {
     if (!isDisabled) {
       inputRef.current?.focus();
+      setIsFocused(true);
     }
   }, [isDisabled]);
+
+  const handleFocusChange = (status: boolean) => {
+    setIsFocused(status)
+  };
 
   /**
    * Gère la soumission du formulaire
@@ -50,6 +57,7 @@ const ChatInput = memo(function ChatInput({ onSendMessage, isDisabled = false }:
 
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-3xl">
+      <HelperInput onSendMessage={onSendMessage} isFocused={isFocused}></HelperInput>
       <div className="relative flex items-center">
         <input
           ref={inputRef}
@@ -59,6 +67,8 @@ const ChatInput = memo(function ChatInput({ onSendMessage, isDisabled = false }:
           onKeyDown={handleKeyDown}
           placeholder="Tapez votre message..."
           disabled={isDisabled}
+          onFocus={() => handleFocusChange(true)}
+          onBlur={() => handleFocusChange(false)}
           aria-label="Message à envoyer"
           className="w-full p-4 pr-12 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-400 shadow-sm transition-all duration-200"
         />
@@ -89,7 +99,6 @@ const ChatInput = memo(function ChatInput({ onSendMessage, isDisabled = false }:
   );
 });
 
-// Nom d'affichage pour les outils de développement
 ChatInput.displayName = 'ChatInput';
 
 export default ChatInput; 
